@@ -1,65 +1,70 @@
-#%%
-
 from ast import literal_eval
 import geojson as gj
 import json
 
-fileOpen = r"C:\Users\jmathers\Documents\Programming\Repositories\Mapbox-Buildings\01.log"
-fileSave = r"C:\Users\jmathers\Documents\Programming\Repositories\Mapbox-Buildings\data\test.geojson"
-
-with open(fileOpen) as f:
-    content = f.readlines()
-
-def convertType(x):
-    try:
-        return literal_eval(x)
-    except:
-        return x
-
-newContent = []
-for x in content:
-    if x[:5] == 'build':
-        newContent.append(convertType(x[14:].strip()))
-    else:
-        newContent.append(convertType(x[4:].strip()))
+fileOpen = r"C:\Users\jmathers\Documents\Programming\Repositories\Mapbox-Buildings\03.log"
+fileSave = r"C:\Users\jmathers\Documents\Programming\Repositories\Mapbox-Buildings\data\03.geojson"
 
 
-geomType = []
-height = []
-minHeight = []
-contentCoords = []
+def logToGeojson(fileOpen, fileSave):
+    
+    with open(fileOpen) as f:
+        content = f.readlines()
 
-itemCoords = []
-coords = []
-add = True
-for line in newContent:
-    if isinstance(line, str):
-        geomType.append(line)
-    elif isinstance(line, float):
-        if len(coords) <= 1:
-            coords.append(line)
+    def convertType(x):
+        try:
+            return literal_eval(x)
+        except:
+            return x
+
+    newContent = []
+    for x in content:
+        if x[:5] == 'build':
+            newContent.append(convertType(x[14:].strip()))
         else:
-            itemCoords.append(coords)
-            coords = [line]
-    elif isinstance(line, int):
-        coords = []
-        if add:
-            contentCoords.append(itemCoords)
-            itemCoords = []
-            height.append(line)
-            add = False
-        else:
-            minHeight.append(line)
-            add = True
+            newContent.append(convertType(x[4:].strip()))
 
-features = []
-for t, h, m, c in zip(geomType, height, minHeight, contentCoords):
-    if t == 'Polygon':
-        geom = gj.Polygon([c])
-        feature = gj.Feature(geometry=geom, properties={'height': h, 'min_height': m})
-        features.append(feature)
+    geomType = []
+    height = []
+    minHeight = []
+    ids = []
+    contentCoords = []
 
-featureCollection = gj.FeatureCollection(features)
+    itemCoords = []
+    coords = []
+    count = 0
+    for line in newContent:
+        if isinstance(line, str):
+            geomType.append(line)
+        elif isinstance(line, float):
+            if len(coords) <= 1:
+                coords.append(line)
+            else:
+                itemCoords.append(coords)
+                coords = [line]
+        elif isinstance(line, int):
+            coords = []
+            if count == 0:
+                contentCoords.append(itemCoords)
+                itemCoords = []
+                height.append(line)
+                count += 1
+            elif count == 1:
+                minHeight.append(line)
+                count += 1
+            else:
+                ids.append(line)
+                count = 0
 
-with open(fileSave, 'w') as f:
-    gj.dump(featureCollection, f)
+
+    features = []
+    for t, h, m, i, c in zip(geomType, height, minHeight, ids, contentCoords):
+        if t == 'Polygon':
+            geom = gj.Polygon([c])
+            feature = gj.Feature(geometry=geom, properties={'id': i, 'height': h, 'min_height': m})
+            features.append(feature)
+
+    featureCollection = gj.FeatureCollection(features)
+
+    with open(f'{fileSave}.geojson', 'w') as f:
+        gj.dump(featureCollection, f)
