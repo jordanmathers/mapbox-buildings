@@ -49,22 +49,43 @@
             zoom: 12
         });
 
-        map.addSource('lga-source', {
+        map.on('load', function () {
+
+            map.addSource('lga-source', {
                 'type': 'geojson',
                 'generateId': true,
                 'data':
-                    'data/lga.geojson'
+                    'https://raw.githubusercontent.com/jordanmathers/mapbox-buildings/master/data/lga.geojson'
             });
 
-        map.addLayer({
+            map.addLayer({
                 'id': 'lga',
                 'type': 'line',
-                'source': 'plots-source',
+                'source': 'lga-source',
                 'paint': {
                     'line-color': 'red',
                     'line-width': 3,
                 }
             });
+
+            map.addSource('grid-source', {
+                'type': 'geojson',
+                'generateId': true,
+                'data':
+                    'https://raw.githubusercontent.com/jordanmathers/mapbox-buildings/master/data/grid.geojson'
+            });
+
+            map.addLayer({
+                'id': 'grid',
+                'type': 'line',
+                'source': 'grid-source',
+                'paint': {
+                    'line-color': 'black',
+                    'line-width': 1,
+                }
+            });
+
+        });
 
         var generate = document.getElementById('generate');
 
