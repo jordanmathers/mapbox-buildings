@@ -2,9 +2,6 @@ from ast import literal_eval
 import geojson as gj
 import json
 
-fileOpen = r"C:\Users\jmathers\Documents\Programming\Repositories\Mapbox-Buildings\03.log"
-fileSave = r"C:\Users\jmathers\Documents\Programming\Repositories\Mapbox-Buildings\data\03.geojson"
-
 
 def logToGeojson(fileOpen, fileSave):
     
@@ -19,8 +16,8 @@ def logToGeojson(fileOpen, fileSave):
 
     newContent = []
     for x in content:
-        if x[:5] == 'build':
-            newContent.append(convertType(x[14:].strip()))
+        if x[:6] == 'Mapbox':
+            newContent.append(convertType(x[35:].strip()))
         else:
             newContent.append(convertType(x[4:].strip()))
 
@@ -56,7 +53,6 @@ def logToGeojson(fileOpen, fileSave):
                 ids.append(line)
                 count = 0
 
-
     features = []
     for t, h, m, i, c in zip(geomType, height, minHeight, ids, contentCoords):
         if t == 'Polygon':
@@ -68,3 +64,7 @@ def logToGeojson(fileOpen, fileSave):
 
     with open(f'{fileSave}.geojson', 'w') as f:
         gj.dump(featureCollection, f)
+
+
+
+
