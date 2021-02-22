@@ -11,6 +11,9 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css" rel="stylesheet" />
 
+    <!-- FileSaver -->
+    <script src="FileSaver.js"></script>
+
     <style>
         #map {
             position: absolute;
@@ -22,7 +25,7 @@
         .map-overlay {
             font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
             position: absolute;
-            width: 200px;
+            width: 400px;
             top: 0;
             left: 0;
             padding: 10px;
@@ -36,7 +39,9 @@
     <div id='map' class='map'></div>
 
     <div class="map-overlay top">
-        <button id="generate" name="layer">Generate</option>
+        <p>1. Zoom in until you see buildings. <br>2. Click 'generate'. <br>3. Move and repeat until area desired has been covered. <br> 4. Click 'save' <br>5. Run the *.exe to convert to GeoJSON</p>
+        <button id="generate" name="generate">Generate</button>
+        <button id="save" name="save">Save</button>
     </div>
 
     <script>
@@ -49,67 +54,25 @@
             zoom: 12
         });
 
-        map.on('load', function () {
-
-            map.addSource('lga-source', {
-                'type': 'geojson',
-                'generateId': true,
-                'data':
-                    'https://raw.githubusercontent.com/jordanmathers/mapbox-buildings/master/data/lga.geojson'
-            });
-
-            map.addLayer({
-                'id': 'lga',
-                'type': 'line',
-                'source': 'lga-source',
-                'paint': {
-                    'line-color': 'red',
-                    'line-width': 3,
-                }
-            });
-
-            map.addSource('grid-source', {
-                'type': 'geojson',
-                'generateId': true,
-                'data':
-                    'https://raw.githubusercontent.com/jordanmathers/mapbox-buildings/master/data/gridv3.geojson'
-            });
-
-            map.addLayer({
-                'id': 'grid',
-                'type': 'line',
-                'source': 'grid-source',
-                'paint': {
-                    'line-color': 'black',
-                    'line-width': 1,
-                }
-            });
-
-        });
-
         var generate = document.getElementById('generate');
+
+        var building_ids = [];
+        var building_coords = [];
+        var building_type = [];
 
         generate.onclick = function () {
             features = map.queryRenderedFeatures(
-                { layers: ["building"], filter: ['==', 'extrude', 'true'] }); // This is where I get building information
-
+                { layers: ["building"], filter: ['==', 'extrude', 'true'] });
             features.forEach(function (feature) {
-
-                console.log(feature.geometry.type);
-
-                var coordinates = feature.geometry.coordinates[0];
-
-                coordinates.forEach(function (c) {
-                    console.log(c[0]);
-                    console.log(c[1]);
-                });
-
-                console.log(feature.properties.height);
-                console.log(feature.properties.min_height);
-
-                console.log(feature.id);
-
+                building_type.push(feature.geometry.type)
+                building_ids.push(feature.id)
+                building_coords.push(feature.geometry.coordinates)
             });
+        };
+
+        save.onclick = function () {
+            var blob = new Blob([[JSON.stringify(building_coords), JSON.stringify(building_ids), JSON.stringify(building_type)]], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, "buildinglog.txt");
         };
 
     </script>

@@ -1,3 +1,5 @@
+#%%
+
 import PySimpleGUI as sg 
 
 from convert2geo import logToGeojson

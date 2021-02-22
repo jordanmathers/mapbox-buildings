@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['mapboxBuildingsGeoJSON.py'],
-             pathex=['C:\\Users\\jmathers\\Documents\\Programming\\Repositories\\Mapbox-Buildings'],
+             pathex=['C:\\Users\\jmathers\\Documents\\GitHub\\mapbox-buildings'],
              binaries=[],
              datas=[],
              hiddenimports=[],
